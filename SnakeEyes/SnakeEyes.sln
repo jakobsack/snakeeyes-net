@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsmqTraceListener", "MsmqTr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveFileProbe", "LiveFileProbe\LiveFileProbe.csproj", "{8D6B62BF-FCE8-4F84-B65B-FA2603DF31A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WcfServiceTraceListener", "WcfServiceTraceListener\WcfServiceTraceListener.csproj", "{BE987FE7-B9FD-4834-86BE-C6749977EBF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{8D6B62BF-FCE8-4F84-B65B-FA2603DF31A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D6B62BF-FCE8-4F84-B65B-FA2603DF31A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D6B62BF-FCE8-4F84-B65B-FA2603DF31A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE987FE7-B9FD-4834-86BE-C6749977EBF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE987FE7-B9FD-4834-86BE-C6749977EBF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE987FE7-B9FD-4834-86BE-C6749977EBF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE987FE7-B9FD-4834-86BE-C6749977EBF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
