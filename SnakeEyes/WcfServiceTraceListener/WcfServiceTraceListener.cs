@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -9,11 +11,21 @@ namespace SnakeEyes
 {
     public class WcfServiceTraceListener : TraceListener
     {
-        protected virtual void SendMessage(string message)
+		[ConfigurationProperty("username")]
+		[Description("SMTP Username")]
+		public string Username { get { return Attributes["username"]; } }
+
+		[ConfigurationProperty("password")]
+		[Description("SMTP Password")]
+		public string Password { get { return Attributes["password"]; } }
+
+		protected virtual void SendMessage(string message)
         {
             try
             {
                 MonitoringServiceClient client = new MonitoringServiceClient();
+				client.ClientCredentials.UserName.UserName = Username;
+				client.ClientCredentials.UserName.Password = Password;
 
                 XmlDocument xmlDoc = null;
                 xmlDoc = new XmlDocument();
@@ -72,7 +84,7 @@ namespace SnakeEyes
 
         protected override string[] GetSupportedAttributes()
         {
-            return new string[] {};
+            return new string[] {"username", "password"};
         }
     }
 }
