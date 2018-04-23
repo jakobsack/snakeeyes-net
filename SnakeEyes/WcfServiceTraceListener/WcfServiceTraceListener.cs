@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml;
 using WcfServiceTraceListener.MonitoringService;
 
@@ -11,51 +12,53 @@ namespace SnakeEyes
 {
     public class WcfServiceTraceListener : TraceListener
     {
-		[ConfigurationProperty("username")]
-		[Description("SMTP Username")]
-		public string Username { get { return Attributes["username"]; } }
+        [ConfigurationProperty("username")]
+        [Description("SMTP Username")]
+        public string Username { get { return Attributes["username"]; } }
 
-		[ConfigurationProperty("password")]
-		[Description("SMTP Password")]
-		public string Password { get { return Attributes["password"]; } }
+        [ConfigurationProperty("password")]
+        [Description("SMTP Password")]
+        public string Password { get { return Attributes["password"]; } }
 
-		protected virtual void SendMessage(string message)
+        protected virtual void SendMessage(string message)
         {
             try
             {
-                MonitoringServiceClient client = new MonitoringServiceClient();
-				client.ClientCredentials.UserName.UserName = Username;
-				client.ClientCredentials.UserName.Password = Password;
-
-                XmlDocument xmlDoc = null;
-                xmlDoc = new XmlDocument();
-                xmlDoc.LoadXml(message);
-                XmlNode n = xmlDoc.SelectSingleNode("/TraceEvent");
-                Enum.TryParse<TraceEventType>(n.SelectSingleNode("EventType").InnerText, out TraceEventType type);
-
-                ProbeResultMessage p = new ProbeResultMessage
+                using (MonitoringServiceClient client = new MonitoringServiceClient())
                 {
-                    MachineName = n.SelectSingleNode("MachineName").InnerText,
-                    Name = n.SelectSingleNode("Source").InnerText,
-                    Timestamp = DateTime.Parse(n.SelectSingleNode("Timestamp").InnerText),
-                    EventType = type,
-                    Message = n.SelectSingleNode("Message").InnerText
-                };
+                    client.ClientCredentials.UserName.UserName = Username;
+                    client.ClientCredentials.UserName.Password = Password;
 
-                if (n.SelectSingleNode("Value") != null && n.SelectSingleNode("Value").InnerText.Trim() != "")
-                {
-                    p.Value = Double.Parse(n.SelectSingleNode("Value").InnerText);
+                    XmlDocument xmlDoc = null;
+                    xmlDoc = new XmlDocument();
+                    xmlDoc.LoadXml(message);
+                    XmlNode n = xmlDoc.SelectSingleNode("/TraceEvent");
+                    Enum.TryParse<TraceEventType>(n.SelectSingleNode("EventType").InnerText, out TraceEventType type);
+
+                    ProbeResultMessage p = new ProbeResultMessage
+                    {
+                        MachineName = n.SelectSingleNode("MachineName").InnerText,
+                        Name = n.SelectSingleNode("Source").InnerText,
+                        Timestamp = DateTime.Parse(n.SelectSingleNode("Timestamp").InnerText),
+                        EventType = type,
+                        Message = n.SelectSingleNode("Message").InnerText
+                    };
+
+                    if (n.SelectSingleNode("Value") != null && n.SelectSingleNode("Value").InnerText.Trim() != "")
+                    {
+                        p.Value = Double.Parse(n.SelectSingleNode("Value").InnerText);
+                    }
+                    if (n.SelectSingleNode("MaxValue") != null && n.SelectSingleNode("MaxValue").InnerText.Trim() != "")
+                    {
+                        p.MaxValue = Double.Parse(n.SelectSingleNode("MaxValue").InnerText);
+                    }
+                    if (n.SelectSingleNode("MinValue") != null && n.SelectSingleNode("MinValue").InnerText.Trim() != "")
+                    {
+                        p.MinValue = Double.Parse(n.SelectSingleNode("MinValue").InnerText);
+                    }
+
+                    client.AddProbeResult(p);
                 }
-                if (n.SelectSingleNode("MaxValue") != null && n.SelectSingleNode("MaxValue").InnerText.Trim() != "")
-                {
-                    p.MaxValue = Double.Parse(n.SelectSingleNode("MaxValue").InnerText);
-                }
-                if (n.SelectSingleNode("MinValue") != null && n.SelectSingleNode("MinValue").InnerText.Trim() != "")
-                {
-                    p.MinValue = Double.Parse(n.SelectSingleNode("MinValue").InnerText);
-                }
-
-                client.AddProbeResult(p);
             }
             catch (Exception ex)
             {
@@ -71,7 +74,7 @@ namespace SnakeEyes
             if (Filter != null && !Filter.ShouldTrace(eventCache, source, eventType, id, message, null, null, null))
                 return;
 
-            SendMessage(message);
+            Task.Run(() => SendMessage(message));
         }
 
         public override void Write(string message)
@@ -84,7 +87,7 @@ namespace SnakeEyes
 
         protected override string[] GetSupportedAttributes()
         {
-            return new string[] {"username", "password"};
+            return new string[] { "username", "password" };
         }
     }
 }
